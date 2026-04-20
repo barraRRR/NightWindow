@@ -1,0 +1,9 @@
+ascii-magic
+requests
+readchar
+geopy
+python-dotenv
+Pillow
+skyfield
+matplotlib
+pandas
