@@ -3,8 +3,9 @@ import os
 import time
 import requests
 from geopy.geocoders import Nominatim
-from ascii_magic import AsciiArt, Back
-import json
+from datetime import datetime, timezone, timedelta
+from PIL import Image
+import ascii_magic
 from utils import IpError, GeolocationError, AstronomyAPIError
 from utils import loading, app_exit, get_option, welcome
 from starmap import SkySimulator
@@ -28,11 +29,40 @@ def main() -> None:
         sys.exit(e)
     
     lat, lon, city = data
-    client_id, client_secret = load_creadentials()
 
-    auth_code = get_auth_code(client_id, client_secret)
-    star_char = get_star_char(lat, lon, '2026-04-20', auth_code)
-    display_star_char(star_char)
+    user_input = get_option(
+        'Choose option:', [
+            'Tonight',
+            'Another date']
+    )
+
+    try:
+        if user_input == '1':
+            date = datetime.now(timezone.utc)
+        else:
+            date = datetime.fromisoformat(
+                input('Enter date (YYYY-MM-DD): ')
+                )
+    except Exception:
+        sys.exit('Error: an error ocurred when retrieving date')
+    
+    sim = SkySimulator(lat=lat, lon=lon, t_utc=date)
+
+    start_time = date.replace(hour=19, minute=0, second=0, microsecond=0)
+    
+    total_frames = 200
+    minutes_step = 2
+
+    print(f'🎬 Iniciando simulación desde las {start_time.strftime("%H:%M")} UTC...')
+    for i in range(total_frames):
+        current_time = start_time + timedelta(minutes=i * minutes_step)
+        sim.generate_sky_frame(frame_num=i)
+        render_ascii(f'frames/frame_{i:03d}.png')
+        print(f'Frame {i:03d} generado para las {current_time.strftime("%H:%M")}', end='\r')
+
+    print('\n✅ ¡Secuencia completada!')
+
+    create_gif()
 
 
 def get_coords(city_name: str) -> tuple[float, float, str]:
@@ -53,6 +83,72 @@ def get_coords(city_name: str) -> tuple[float, float, str]:
             sys.exit(e)
 
 
+def create_gif(folder: str = 'frames',
+               output_name: str = 'NightWindow.gif',
+               duration: int = 150
+               ) -> str:
+    
+    print(f'🎞️ Creating GIF: {output_name}...')
+
+    files = sorted([
+        os.path.join(folder, f) for f in os.listdir(folder)
+        if f.endswith('.png')])
+    if not files:
+        raise FileNotFoundError('Frames not found')
+    
+    img, *append_images = [Image.open(f) for f in files]
+
+    img.save(
+        output_name,
+        format='GIF',
+        append_images=append_images,
+        save_all=True,
+        duration=duration,
+        loop=0
+    )
+
+    print('GIF succesfully created')
+
+    return output_name
+
+
+def render_ascii(img_path: str) -> None:
+    try:
+        ascii_art = ascii_magic.from_image(img_path)
+        ascii_art.to_image_file(
+            path=img_path,
+            full_color=True,
+            char=' ·*#@'
+            )
+
+    except Exception as e:
+            print(f'Error rendering ASCII: {e}')
+
+
+def test() -> None:
+
+    sim = SkySimulator()
+    lat, lon = 40.4167, -3.7033
+    start_time = datetime.now(timezone.utc).replace(
+        hour=19,
+        minute=0,
+        second=0,
+        microsecond=0
+    )
+
+    total_frames = 200
+    minutes_step = 2
+
+    print(f'🎬 Iniciando simulación desde las {start_time.strftime("%H:%M")} UTC...')
+    for i in range(total_frames):
+        current_time = start_time + timedelta(minutes=i * minutes_step)
+        sim.generate_sky_frame(lat, lon, current_time, i)
+        render_ascii(f'frames/frame_{i:03d}.png')
+        print(f'Frame {i:03d} generado para las {current_time.strftime("%H:%M")}', end='\r')
+
+    print('\n✅ ¡Secuencia completada!')
+
+    create_gif()
 
 
 if __name__ == '__main__':
