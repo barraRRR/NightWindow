@@ -3,6 +3,7 @@ from skyfield.data import hipparcos
 import matplotlib.pyplot as plt
 from datetime import datetime, timezone, timedelta
 import os
+from PIL import Image
 
 
 class SkySimulator:
@@ -58,8 +59,42 @@ class SkySimulator:
         
         filename = f'frames/frame_{frame_num:03d}.png'
 
-        plt.savefig(filename, facecolor='black', bbox_inches='tight', pad_inches=0)
+        plt.savefig(
+            filename,
+            facecolor='black',
+            bbox_inches='tight',
+            pad_inches=0
+            )
         plt.close()
+    
+    def create_gif(self, folder: str = 'frames',
+                   output_name: str = 'NightWindow.gif',
+                   duration: int = 100
+                   ) -> str:
+        
+        print(f'🎞️ Creating GIF: {output_name}...')
+
+        files = sorted([
+            os.path.join(folder, f) for f in os.listdir(folder)
+            if f.endswith('.png')])
+        if not files:
+            raise FileNotFoundError('Frames not found')
+        
+        img, *append_images = [Image.open(f) for f in files]
+
+        img.save(
+            output_name,
+            format='GIF',
+            append_images=append_images,
+            save_all=True,
+            duration=duration,
+            loop=0
+        )
+
+        print('GIF succesfully created')
+
+        return output_name
+
 
 
 def test() -> None:
@@ -83,6 +118,8 @@ def test() -> None:
         print(f'Frame {i:03d} generado para las {current_time.strftime("%H:%M")}', end='\r')
 
     print('\n✅ ¡Secuencia completada!')
+
+    sim.create_gif()
 
 
 if __name__ == '__main__':
