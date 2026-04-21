@@ -56,7 +56,7 @@ def main() -> None:
     print(f'🎬 Iniciando simulación desde las {start_time.strftime("%H:%M")} UTC...')
     for i in range(total_frames):
         current_time = start_time + timedelta(minutes=i * minutes_step)
-        sim.generate_sky_frame(frame_num=i)
+        sim.generate_sky_frame(current_time=current_time, frame_num=i)
         render_ascii(f'frames/frame_{i:03d}.png')
         print(f'Frame {i:03d} generado para las {current_time.strftime("%H:%M")}', end='\r')
 

@@ -30,11 +30,12 @@ class SkySimulator:
 
     def generate_sky_frame(
             self,
+            current_time: datetime,
             frame_num: int = 0
             ) -> None:
         
         observer = self.earth + wgs84.latlon(self.lat, self.lon)
-        t = self.ts.from_datetime(self.t_utc)
+        t = self.ts.from_datetime(current_time)
 
         astrometric_stars = observer.at(t).observe(self.stars)
         alt_s, az_s, _ = astrometric_stars.apparent().altaz()
