@@ -12,47 +12,21 @@ from starmap import SkySimulator
 
 
 def main() -> None:
-    #welcome()
-    user_input = get_option(
-        'Please, select your choice of preference:', [
-            'my current position [ip]',
-            'introduce location'
-        ])
+    welcome()
+    lat, lon, city = get_coords()
+    start_time = get_date()
+    sim = SkySimulator(lat=lat, lon=lon, t_utc=start_time)
+    create_gallery(start_time=start_time,
+                   sim=sim,
+                   total_frames=200,
+                   minutes_step=2)
+    create_gif()
 
-    try:
-        if user_input == '1':
-            data = get_coords('ip')
-        elif user_input == '2':
-            data = get_coords(input('Enter city name: '))
-    
-    except (IpError, GeolocationError) as e:
-        sys.exit(e)
-    
-    lat, lon, city = data
 
-    user_input = get_option(
-        'Choose option:', [
-            'Tonight',
-            'Another date']
-    )
-
-    try:
-        if user_input == '1':
-            date = datetime.now(timezone.utc)
-        else:
-            date = datetime.fromisoformat(
-                input('Enter date (YYYY-MM-DD): ')
-                )
-    except Exception:
-        sys.exit('Error: an error ocurred when retrieving date')
-    
-    sim = SkySimulator(lat=lat, lon=lon, t_utc=date)
-
-    start_time = date.replace(hour=19, minute=0, second=0, microsecond=0)
-    
-    total_frames = 200
-    minutes_step = 2
-
+def create_gallery(start_time: datetime,
+                   sim: SkySimulator,
+                   total_frames: int = 200,
+                   minutes_step: int = 2) -> None:
     print(f'🎬 Iniciando simulación desde las {start_time.strftime("%H:%M")} UTC...')
     for i in range(total_frames):
         current_time = start_time + timedelta(minutes=i * minutes_step)
@@ -62,25 +36,49 @@ def main() -> None:
 
     print('\n✅ ¡Secuencia completada!')
 
-    create_gif()
+
+def get_date() -> datetime:
+        user_input = get_option(
+        'Choose option:', [
+            'Tonight',
+            'Another date']
+        )
+
+        try:
+            if user_input == '1':
+                date = datetime.now(timezone.utc)
+            else:
+                date = datetime.fromisoformat(
+                    input('Enter date (YYYY-MM-DD): ')
+                    )
+        except Exception:
+            sys.exit('Error: an error ocurred when retrieving date')
+        
+        return date.replace(hour=19, minute=0, second=0, microsecond=0)
 
 
-def get_coords(city_name: str) -> tuple[float, float, str]:
+def get_coords() -> tuple[float, float, str]:
+    user_input = get_option(
+        'Please, select your choice of preference:', [
+            'my current position [ip]',
+            'introduce location'
+        ])
+
     try:
-        if city_name == 'ip':
+        if user_input == '1':
             response = requests.get('http://www.ip-api.com/json', timeout=5)
             response.raise_for_status()
             data = response.json()
             return data['lat'], data['lon'], data['city']
-        
-        else:
+        elif user_input == '2':
+            city_name = input('Enter city name: ')
             geolocator = Nominatim(user_agent='star_chart_app')
             location = geolocator.geocode(city_name)
             if location:
                 return location.latitude, location.longitude, city_name
     
-    except Exception as e:
-            sys.exit(e)
+    except (IpError, GeolocationError) as e:
+        sys.exit(e)
 
 
 def create_gif(folder: str = 'frames',
@@ -123,32 +121,6 @@ def render_ascii(img_path: str) -> None:
 
     except Exception as e:
             print(f'Error rendering ASCII: {e}')
-
-
-def test() -> None:
-
-    sim = SkySimulator()
-    lat, lon = 40.4167, -3.7033
-    start_time = datetime.now(timezone.utc).replace(
-        hour=19,
-        minute=0,
-        second=0,
-        microsecond=0
-    )
-
-    total_frames = 200
-    minutes_step = 2
-
-    print(f'🎬 Iniciando simulación desde las {start_time.strftime("%H:%M")} UTC...')
-    for i in range(total_frames):
-        current_time = start_time + timedelta(minutes=i * minutes_step)
-        sim.generate_sky_frame(lat, lon, current_time, i)
-        render_ascii(f'frames/frame_{i:03d}.png')
-        print(f'Frame {i:03d} generado para las {current_time.strftime("%H:%M")}', end='\r')
-
-    print('\n✅ ¡Secuencia completada!')
-
-    create_gif()
 
 
 if __name__ == '__main__':
