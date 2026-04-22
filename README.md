@@ -29,7 +29,7 @@
 ## Description
 NightWindow is a Python-based CLI application that allows users to peer into the night sky from any location on Earth. By providing a city name or using their current IP, users can generate a beautiful, animated ascii GIF showing the movement of stars, planets, and the moon over the course of a night.
 
-
+<img width="1313" height="788" alt="nightwindow_20260422_madrid" src="https://github.com/user-attachments/assets/973aaa67-899d-4e46-9692-e96cea0fb1b0" />
 
 ## Technical Features
 
