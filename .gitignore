@@ -4,3 +4,5 @@ nightwindow_*
 venv
 frames
 __pycache__
+logo
+.gitignore

@@ -17,7 +17,7 @@
         "window_confirm": "Press [ENTER] to confirm or [b] to return to the Main Menu...",
         "instructions": "\n--- HOW TO USE NIGHTWINDOW ---\n1. Choose your location (IP or City).\n2. Select a date to see the exact sky for that night.\n3. Wait for the engine to render the frames.\n4. Enjoy your animated ASCII GIF!\n\nPress [ENTER] to return to the Main Menu...",
         "end_prompt": "\nPress [ENTER] to create another window, or [q] to quit: ",
-        "exit": "\n.  .   .   .   .   .   .   .   .   .   .\n\n  Clear skies! Thank you for using NightWindow.\n\n  If you liked it, consider giving it a star on GitHub:\n  https://github.com/barraRRR/nightwindow\n\n.  .   .   .   .   .   .   .   .   .   .\n"
+        "exit": "\n.  .   .   .   .   .   .   .   .   .   .\n\n  Clear skies! Thank you for using NightWindow.\n\n  If you liked it, consider giving it a star on GitHub:\n  https://github.com/barraRRR/NightWindow\n\n.  .   .   .   .   .   .   .   .   .   .\n"
     },
     "status": {
         "init": "Initializating NightWindow...",
