@@ -83,7 +83,7 @@ This project allowed me to solidify my knowledge of Python's advanced features, 
 
 ## Acknowledgments
 
-- [Skyfield](https://github.com/skyfieldjpl/python-skyfield) - Astronomical position calculations and star catalog
+- [Skyfield](https://github.com/skyfielders/python-skyfield/) - Astronomical position calculations and star catalog
 - [Hipparcos Catalog](https://www.cosmos.esa.int/web/hipparcos) - Comprehensive star data
 - [ASCII Magic](https://github.com/jmportilla/ascii_magic) - ASCII art conversion
 - CS50P Staff - Foundations of Python development
