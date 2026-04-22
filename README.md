@@ -1,5 +1,7 @@
 # 🌌 NightWindow
 
+<div align="center">
+
 ```
   . o                   |      o                         '                     
         o        .     -+-         .   .                   .           '     +  
@@ -21,6 +23,8 @@
   '.     *                   '             +       '' o             . .         
                               +             o    .    *                         
 ```
+
+</div>
 
 **A Celestial Time-Lapse Generator for the Command Line**
 
