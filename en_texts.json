@@ -36,7 +36,7 @@
         "target": "Confirmating target..."
     },
     "errors": {
-        "invalid_option": "❌ Error: Invalid option. Please select 1, 2, or 3.",
+        "invalid_option": "❌ Error: Invalid option.",
         "invalid_city": "❌ Error: Invalid city name. Please try another city or enter [quit] to exit.",
         "date": "❌ Error: Invalid date format. Please use YYYY-MM-DD.",
         "city_not_found": "❌ Error: Could not find coordinates for '{city}'.",

@@ -6,7 +6,7 @@
 
 **A Celestial Time-Lapse Generator for the Command Line**
 
-[Video Demo](Your YouTube Link Here)
+[Video Demo](https://youtu.be/Z0Q9BfnsHI0)
 
 ## Description
 NightWindow is a Python-based CLI application that allows users to peer into the night sky from any location on Earth. By providing a city name or using their current IP, users can generate a beautiful, animated ascii GIF showing the movement of stars, planets, and the moon over the course of a night.
@@ -23,7 +23,24 @@ Initially, the project was intended to use external Astronomy APIs. However, aft
 - **Matplotlib**: Acts as the rendering heart, plotting thousands of stars with magnitudes and colors, along with the Moon and visible planets (Mars, Jupiter, Saturn, Venus).
 - **ASCII Magic**: Integrated to provide a unique "retro" aesthetic to the generated frames before compiling them.
 
-### 2. Advanced UX/UI Components
+### 2. The Rendering Engine (Matplotlib)
+
+While Matplotlib is traditionally used for data visualization, NightWindow repurposes it as a graphical render engine to generate high-fidelity celestial frames.
+
+Key technical implementations include:
+
+- **Dynamic Star Sizing**: Instead of uniform points, star sizes are calculated using an exponential formula based on their Hipparcos magnitude. This mimics real-world luminosity, where brighter stars appear larger on a black background.
+  - Formula: `s = ((6 - magnitude) ** 2.5) + 20`
+
+- **Horizon Masking**: The engine performs real-time filtering of astronomical coordinates. Only objects with an altitude >0° are passed to the scatter plot, ensuring stars and planets "set" naturally behind the horizon.
+
+- **Planetary Color Mapping**: Specific hex-color values are assigned to major celestial bodies (e.g., #ff4500 for Mars, #f59aff for Jupiter) to maintain visual clarity and scientific recognition in the final output.
+
+- **Fixed Viewport Configuration**: To create a consistent time-lapse, the engine locks the field of view (FOV) and axes limits. This prevents Matplotlib from auto-scaling, which is crucial for achieving a stable video effect in the final GIF.
+
+- **Headless Rendering**: The class is optimized to run without a GUI backend (`plt.close()`), allowing for the rapid generation of hundreds of frames in the background without opening floating windows.
+
+### 3. Advanced UX/UI Components
 
 - **Threaded Spinner**: To prevent the CLI from feeling "frozen" during heavy astronomical calculations or API calls, I implemented a custom Spinner class. It runs on a background thread (threading), allowing a Braille animation to spin smoothly while the main thread processes data.
 - **Custom Decorators**: I developed the `@with_spinner` decorator to wrap heavy-lifting functions. This keeps the code clean and provides a consistent visual feedback system (Loading → Success).

@@ -8,12 +8,17 @@ from datetime import datetime, timezone, timedelta
 from PIL import Image
 import ascii_magic
 from skysimulator import SkySimulator
-from utils import Spinner, with_spinner, clear, end, get_filename
+from utils import Spinner, with_spinner, clear, end
 from utils import get_option, app_exit
 from config import TEXTS, LOGO
 
 
 def main() -> None:
+    """
+    Main entry point of the application. Orchestrates the entire workflow:
+    displays welcome screen, manages user menu, collects location and date,
+    creates astronomical simulation, generates frame gallery, and compiles GIF.
+    """
     welcome()
 
     while True:
@@ -35,6 +40,10 @@ def main() -> None:
 
 
 def welcome() -> str:
+    """
+    Display the welcome screen with the application logo and a brief delay.
+    Clears the terminal and shows the NightWindow logo.
+    """
     os.system('cls' if os.name == 'nt' else 'clear')    
     @with_spinner(msg_key='init', delay=1.0)
     def show_logo() -> str:
@@ -46,6 +55,10 @@ def welcome() -> str:
 
 
 def menu() -> None:
+    """
+    Display the main menu allowing users to start or access help.
+    Handles navigation between start and help options.
+    """
     while True:
         user_choice = get_option(
             TEXTS['ui']['menu_select'], [
@@ -71,6 +84,13 @@ def menu() -> None:
 
 
 def get_coords() -> tuple[float, float, str]:
+    """
+    Retrieve geographic coordinates (latitude, longitude, city name).
+    Allows user to choose between IP-based geolocation or manual city search.
+    
+    Returns:
+        tuple[float, float, str]: A tuple containing (latitude, longitude, city_name)
+    """
     user_input = get_option(
         TEXTS['ui']['prompt_location'], [
             TEXTS['ui']['opt_ip'],
@@ -111,6 +131,13 @@ def get_coords() -> tuple[float, float, str]:
 
 
 def get_date() -> datetime:
+    """
+    Retrieve the observation date from user input.
+    Allows user to choose between tonight or a custom date.
+    
+    Returns:
+        datetime: A datetime object set to 21:00 UTC on the selected date.
+    """
     user_input = get_option(
     TEXTS['ui']['prompt_date'], [
         TEXTS['ui']['opt_tonight'],
@@ -134,6 +161,18 @@ def get_date() -> datetime:
 
 
 def summary(lat: float, lon: float, city: str, date: datetime) -> bool:
+    """
+    Display a summary of selected parameters and ask for user confirmation.
+    
+    Args:
+        lat (float): Latitude coordinate
+        lon (float): Longitude coordinate
+        city (str): City name
+        date (datetime): Observation date
+        
+    Returns:
+        bool: True if user confirms, False if user chooses to go back.
+    """
     @with_spinner(msg_key='confirming_target', success_key='target_confirmed', delay=1.5)
     def show_sum() -> str:
         sum = TEXTS['ui']['summary'].format(lat=lat, lon=lon, city=city, date=date.strftime('%Y-%m-%d'))
@@ -155,6 +194,18 @@ def summary(lat: float, lon: float, city: str, date: datetime) -> bool:
 
 
 def create_simulator(lat: float, lon: float, date: datetime) -> SkySimulator:
+    """
+    Create and initialize a SkySimulator instance with the given parameters.
+    Loads astronomical data including planets, stars, and ephemeris.
+    
+    Args:
+        lat (float): Observer latitude
+        lon (float): Observer longitude
+        date (datetime): Reference date for simulation
+        
+    Returns:
+        SkySimulator: Initialized simulator instance ready for frame generation.
+    """
     try:
         @with_spinner('loading_engine', delay=1.0)
         def get_sim() -> SkySimulator:
@@ -175,6 +226,16 @@ def create_gallery(start_time: datetime,
                    sim: SkySimulator,
                    total_frames: int = 200,
                    minutes_step: int = 2) -> None:
+    """
+    Generate a sequence of sky frames at regular time intervals.
+    Each frame is rendered as an ASCII art representation.
+    
+    Args:
+        start_time (datetime): Starting time for the time-lapse
+        sim (SkySimulator): Initialized sky simulator instance
+        total_frames (int): Total number of frames to generate (default: 200)
+        minutes_step (int): Time interval between frames in minutes (default: 2)
+    """
     @with_spinner(msg_key='starting_sim', success_key=' ', delay=1.5)
     def starting_text() -> str:
         return f'{TEXTS['status']['starting_sim'].format(time=start_time.strftime('%H:%M'))}'
@@ -194,6 +255,13 @@ def create_gallery(start_time: datetime,
 
 
 def render_ascii(img_path: str) -> None:
+    """
+    Convert a PNG image to ASCII art representation and save it.
+    Replaces the original image with an ASCII-rendered version.
+    
+    Args:
+        img_path (str): Path to the PNG image file to convert.
+    """
     try:
         ascii_art = ascii_magic.from_image(img_path)
         ascii_art.to_image_file(
@@ -206,11 +274,40 @@ def render_ascii(img_path: str) -> None:
             print(TEXTS['errors']['ascii'])
 
 
+def get_filename(date: datetime, city: str) -> str:
+    """
+    Generate a safe, formatted filename for the output GIF.
+    Format: nightwindow_YYYYMMDD_city.gif
+    
+    Args:
+        date (datetime): The observation date
+        city (str): The city name
+        
+    Returns:
+        str: A properly formatted filename string.
+    """
+    safe_date = date.strftime('%Y%m%d')
+    safe_city = city.strip().lower().replace(' ', '_')
+
+    return f'nightwindow_{safe_date}_{safe_city}.gif'
+
+
 @with_spinner(msg_key='creating_gif')
 def create_gif(folder: str = 'frames',
                output_name: str = 'nightwindow.gif',
                duration: int = 150
                ) -> str:
+    """
+    Compile PNG frames from a folder into an animated GIF.
+    
+    Args:
+        folder (str): Path to folder containing PNG frames (default: 'frames')
+        output_name (str): Output GIF filename (default: 'nightwindow.gif')
+        duration (int): Frame duration in milliseconds (default: 150)
+        
+    Returns:
+        str: The absolute path to the created GIF file.
+    """
     
     files = sorted([
         os.path.join(folder, f) for f in os.listdir(folder)

@@ -10,17 +10,36 @@ warnings.filterwarnings('ignore', category=RuntimeWarning)
 
 
 class SkySimulator:
+    """
+    Astronomical simulator for generating night sky frames.
+    Calculates celestial positions of stars, planets, and the moon for a given location and time.
+    Renders frames using Matplotlib with customizable magnitude limits.
+    """
     def __init__(self,
                  lat: float,
                  lon: float,
                  t_utc: datetime,
                  mag_limit: float = 5.0):
+        """
+        Initialize the SkySimulator with observer location and observation time.
+        
+        Args:
+            lat (float): Observer latitude in degrees (-90 to 90)
+            lon (float): Observer longitude in degrees (-180 to 180)
+            t_utc (datetime): Observation time in UTC
+            mag_limit (float): Magnitude limit for visible stars (default: 5.0, lower = dimmer stars hidden)
+        """
         self.mag_limit = mag_limit
         self.lat = lat
         self.lon = lon
         self.t_utc = t_utc
         
     def load_assets(self) -> None:
+        """
+        Load astronomical data: ephemeris, planetary data, and star catalog.
+        Downloads and caches Skyfield data (DE421 ephemeris and Hipparcos catalog).
+        Populates instance variables: ts (timescale), planets, earth, stars_df, stars.
+        """
         if not os.path.exists('de421.bsp') or not os.path.exists('hip_main.dat'):
             from config import TEXTS
             print(TEXTS['status']['load_data'])
@@ -35,12 +54,22 @@ class SkySimulator:
         self.stars_df = df[df['magnitude'] <= self.mag_limit]
         self.stars = Star.from_dataframe(self.stars_df)
     
-    
     def generate_sky_frame(
             self,
             current_time: datetime,
             frame_num: int = 0
             ) -> None:
+        """
+        Generate a single sky frame (PNG image) for the given time.
+        Renders stars (with magnitude-based sizing), visible planets, and the moon.
+        
+        Args:
+            current_time (datetime): The observation time for this frame
+            frame_num (int): Frame sequence number for filename (default: 0)
+            
+        Returns:
+            None: Saves PNG file to 'frames/frame_XXXX.png'
+        """
         
         observer = self.earth + wgs84.latlon(self.lat, self.lon)
         t = self.ts.from_datetime(current_time)

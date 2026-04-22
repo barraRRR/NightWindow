@@ -7,3 +7,4 @@ Pillow
 skyfield
 matplotlib
 pandas
+pytest
