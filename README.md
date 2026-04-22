@@ -1,4 +1,26 @@
-# NightWindow
+# 🌌 NightWindow
+
+```
+  . o                   |      o                         '                     
+        o        .     -+-         .   .                   .           '     +  
+                        |  .        +          '        .* .     '              
+              o  .          .   +~~              '                                  
+    .    .                   '                              '            '             
+                      o                +       .           *                      
+        ▄▄     ▄▄▄                  ▄▄▄                            .   +  '             
++       ██▄   ██▀   ' .   █▄    █▄ █▀██  ██  ██▀▀     ++    █▄                
+        ███▄  ██ ▀▀    ▄▄ ██   ▄██▄  ██  ██  ██ ▀▀ ▄        ██                
+   '    ██ ▀█▄██ ██ ▄████ ████▄ ██   ██  ██  ██ ██ ████▄ ▄████ ▄███▄▀█▄ █▄ ██▀
+        ██   ▀██ ██ ██ ██ ██ ██ ██   ██▄ ██▄ ██ ██ ██ ██ ██ ██ ██ ██ ██▄██▄██ 
+      ▀██▀    ██▄██▄▀████▄██ ██▄██   ▀████▀███▀▄██▄██ ▀█▄█▀███▄▀███▀  ▀██▀██▀ 
+                       ██                                                     
+                      ▀▀▀                o   .                                      
+     '              .           ' '                  +             +            
+            . '       _|_  Your Terminal Observatory     '             ++               
+'         '    .   o   |      ' .    .    o                     *   .       *   
+  '.     *                   '             +       '' o             . .         
+                              +             o    .    *                         
+```
 
 **A Celestial Time-Lapse Generator for the Command Line**
 
@@ -76,10 +98,13 @@ One of the most significant technical challenges was managing the project's grow
 
 This project allowed me to solidify my knowledge of Python's advanced features, particularly Multithreading and Decorators. Exploring the "Skeleton UX" flow helped me understand how a user interacts with a program, ensuring that even during long processing times, the interface remains engaging and informative. I truly enjoyed building a tool that turns cold, scientific data into a visual experience.
 
+
 ## Acknowledgments
 
-- **Skyfield & Hipparcos Catalog** for the astronomical data.
-- **CS50P Staff** for the foundations of Python development.
+- [Skyfield](https://github.com/skyfieldjpl/python-skyfield) - Astronomical position calculations and star catalog
+- [Hipparcos Catalog](https://www.cosmos.esa.int/web/hipparcos) - Comprehensive star data
+- [ASCII Magic](https://github.com/jmportilla/ascii_magic) - ASCII art conversion
+- CS50P Staff - Foundations of Python development
 
 ---
 
