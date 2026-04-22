@@ -1,29 +1,7 @@
 # 🌌 NightWindow
 
 <div align="center">
-
-```
-  . o                   |      o                         '                     
-        o        .     -+-         .   .                   .           '     +  
-                        |  .        +          '        .* .     '              
-              o  .          .   +~~              '                                  
-    .    .                   '                              '            '             
-                      o                +       .           *                      
-        ▄▄     ▄▄▄                  ▄▄▄                            .   +  '             
-+       ██▄   ██▀   ' .   █▄    █▄ █▀██  ██  ██▀▀     ++    █▄                
-        ███▄  ██ ▀▀    ▄▄ ██   ▄██▄  ██  ██  ██ ▀▀ ▄        ██                
-   '    ██ ▀█▄██ ██ ▄████ ████▄ ██   ██  ██  ██ ██ ████▄ ▄████ ▄███▄▀█▄ █▄ ██▀
-        ██   ▀██ ██ ██ ██ ██ ██ ██   ██▄ ██▄ ██ ██ ██ ██ ██ ██ ██ ██ ██▄██▄██ 
-      ▀██▀    ██▄██▄▀████▄██ ██▄██   ▀████▀███▀▄██▄██ ▀█▄█▀███▄▀███▀  ▀██▀██▀ 
-                       ██                                                     
-                      ▀▀▀                o   .                                      
-     '              .           ' '                  +             +            
-            . '       _|_  Your Terminal Observatory     '             ++               
-'         '    .   o   |      ' .    .    o                     *   .       *   
-  '.     *                   '             +       '' o             . .         
-                              +             o    .    *                         
-```
-
+<img width="1920" height="1080" alt="logo_white" src="https://github.com/user-attachments/assets/6038e0c8-375a-4eb2-a9e1-97337b7e87bb" />
 </div>
 
 **A Celestial Time-Lapse Generator for the Command Line**
