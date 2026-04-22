@@ -3,12 +3,7 @@ from skyfield.data import hipparcos
 import matplotlib.pyplot as plt
 from datetime import datetime
 import os
-import sys
 import warnings
-import itertools
-import threading
-from typing import Optional
-from time import sleep
 
 
 warnings.filterwarnings('ignore', category=RuntimeWarning)
@@ -20,14 +15,18 @@ class SkySimulator:
                  lon: float,
                  t_utc: datetime,
                  mag_limit: float = 5.0):
-        print('🔭 Initializing Sky Engine...')
         self.mag_limit = mag_limit
         self.lat = lat
         self.lon = lon
         self.t_utc = t_utc
-
-        self.planets = load('de421.bsp')
+        
+    def load_assets(self) -> None:
+        if not os.path.exists('de421.bsp') or not os.path.exists('hip_main.dat'):
+            from config import TEXTS
+            print(TEXTS['status']['load_data'])
+        
         self.ts = load.timescale()
+        self.planets = load('de421.bsp')     
         self.earth = self.planets['earth']
 
         with load.open(hipparcos.URL) as f:
@@ -35,8 +34,8 @@ class SkySimulator:
 
         self.stars_df = df[df['magnitude'] <= self.mag_limit]
         self.stars = Star.from_dataframe(self.stars_df)
-        print('✨ Assets loaded and ready.')
-
+    
+    
     def generate_sky_frame(
             self,
             current_time: datetime,
@@ -118,31 +117,3 @@ class SkySimulator:
             pad_inches=0
             )
         plt.close()
-
-
-class Spinner:
-    def __init__(self, msg: str = 'Loading...'):
-        self.spinner = itertools.cycle(['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'])
-        self.delay: float = 0.1
-        self.msg: str = msg
-        self.running: bool = False
-        self.thread: Optional[threading.Thread] = None
-
-    def _spin(self) -> None:
-        while self.running:
-            sys.stdout.write(f'\r{next(self.spinner)} {self.msg}')
-            sys.stdout.flush()
-            sleep(self.delay)
-    
-    def __enter__(self) -> None:
-        self.running = True
-        self.thread = threading.Thread(target=self._spin, daemon=True)
-        self.thread.start()
-        return self
-    
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.running = False
-        if self.thread:
-            self.thread.join()
-        sys.stdout.write('\r' + ' ' * (len(self.msg) + 2) + '\r')
-        sys.stdout.flush()

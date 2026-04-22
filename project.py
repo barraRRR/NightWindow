@@ -2,19 +2,19 @@ import sys
 import os
 from time import sleep
 import requests
-import json
-import functools
 from readchar import readkey
 from geopy.geocoders import Nominatim
 from datetime import datetime, timezone, timedelta
 from PIL import Image
 import ascii_magic
-from skysimulator import SkySimulator, Spinner
+from skysimulator import SkySimulator
+from utils import Spinner, with_spinner, clear, end, get_filename
+from utils import get_option, app_exit
+from config import TEXTS, LOGO
 
 
 def main() -> None:
-    print(LOGO)
-    sleep(1.5)
+    welcome()
 
     while True:
         clear()
@@ -23,91 +23,26 @@ def main() -> None:
         date = get_date()
         if not summary(lat, lon, city, date):
             continue
-        clear()
-        sim = SkySimulator(lat=lat, lon=lon, t_utc=date)
+        sim = create_simulator(lat=lat, lon=lon, date=date)
         create_gallery(start_time=date,
                     sim=sim,
                     total_frames=331,
                     minutes_step=2)
         filename = get_filename(date, city)
         create_gif(duration=80, output_name=filename)
-        print(TEXTS['status']['gif_created'])
+        print(TEXTS['status']['gif_created'].format(path=os.path.abspath(filename)))
         end()
 
 
-def with_spinner(msg_key: str, success_key: str = None, delay: float = 0.5):
-    def decorator(func):
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):
-            load_msg = TEXTS['status'].get(msg_key, 'Loading...')
-            
-            with Spinner(load_msg):
-                result = func(*args, **kwargs)
-
-                if delay > 0:
-                    sleep(delay)
-                
-                if success_key:
-                    success_msg = TEXTS['status'].get(success_key, 'Done!')
-                    print(f'{success_msg}')
-            return result
-        return wrapper
-    return decorator
-
-
-def load_texts(language: str) -> dict:
-    filename = f'{language}_texts.json'
-    try:
-        with open(filename, 'r', encoding='utf-8') as data:
-            return json.load(data)
-
-    except Exception:
-        sys.exit('❌ Error: text file not found')
-
-
-@with_spinner(msg_key='init', delay=2.0)
 def welcome() -> str:
     os.system('cls' if os.name == 'nt' else 'clear')    
-    try:
-        with open('title.txt', 'r', encoding='utf-8') as file:
-            logo = file.read()
-            sleep(2)
-
-    except FileNotFoundError:
-        sys.exit('Error: title.txt not found')
+    @with_spinner(msg_key='init', delay=1.0)
+    def show_logo() -> str:
+        return LOGO
     
-    return logo
-
-
-def clear() -> None:
-    os.system('cls' if os.name == 'nt' else 'clear')
+    show_logo()
     print(LOGO)
-
-
-def app_exit() -> None:
-    clear()
-    sys.exit(TEXTS['ui']['exit'])
-
-
-def get_option(msg: str, options: list[str]) -> str:
-    print(msg)
-    for i, option in enumerate(options, start=1):
-        print(f'   [{i}] - {option}') 
-    print('   [q] - Quit')
-
-    while True:
-        try:
-            key = readkey().lower()
-            if key == 'q':
-                app_exit()            
-            selection = int(key)
-            if 1 <= selection <= len(options):
-                return key
-            raise ValueError(
-                TEXTS['errors']['invalid_option']
-                )
-        except ValueError as e:
-            print('\n', e)
+    sleep(1.5)
 
 
 def menu() -> None:
@@ -149,9 +84,9 @@ def get_coords() -> tuple[float, float, str]:
             response.raise_for_status()
             data = response.json()
             coords = (data['lat'], data['lon'], data['city'])
-
+        
         except Exception as e:
-            sys.exit(e)
+            sys.exit(TEXTS['errors']['api_timeot'])
 
     elif user_input == '2':
         while True:
@@ -199,33 +134,63 @@ def get_date() -> datetime:
 
 
 def summary(lat: float, lon: float, city: str, date: datetime) -> bool:
-    sum = TEXTS['ui']['summary'].format(lat=lat, lon=lon, city=city, date=date.strftime('%Y-%m-%d'))
-    print(sum)
-    print(TEXTS['ui']['window_confirm'])
-
+    @with_spinner(msg_key='confirming_target', success_key='target_confirmed', delay=1.5)
+    def show_sum() -> str:
+        sum = TEXTS['ui']['summary'].format(lat=lat, lon=lon, city=city, date=date.strftime('%Y-%m-%d'))
+        return f'{sum}\n{TEXTS['ui']['window_confirm']}'
+    
+    sum_text = show_sum()
+    sleep(1)
+    print('\n' + sum_text)
     while True:
         key = readkey().lower()
         if key == '\n':
             clear()
             return True
         elif key == 'b':
+            clear()
             return False
         elif key == 'q':
             app_exit()
+
+
+def create_simulator(lat: float, lon: float, date: datetime) -> SkySimulator:
+    try:
+        @with_spinner('loading_engine', delay=1.0)
+        def get_sim() -> SkySimulator:
+            return SkySimulator(lat=lat, lon=lon, t_utc=date)
+        
+        sim = get_sim()
+        sim.load_assets()
+
+        clear()
+    
+    except Exception:
+        sys.exit(TEXTS['errors']['database_error'])
+
+    return sim
     
 
 def create_gallery(start_time: datetime,
                    sim: SkySimulator,
                    total_frames: int = 200,
                    minutes_step: int = 2) -> None:
-    print(TEXTS['status']['starting_sim'].format(time=start_time.strftime('%H:%M')))
+    @with_spinner(msg_key='starting_sim', success_key=' ', delay=1.5)
+    def starting_text() -> str:
+        return f'{TEXTS['status']['starting_sim'].format(time=start_time.strftime('%H:%M'))}'
+    
+    starting_text()
     for i in range(total_frames):
         current_time = start_time + timedelta(minutes=i * minutes_step)
         sim.generate_sky_frame(current_time=current_time, frame_num=i)
         render_ascii(f'frames/frame_{i:03d}.png')
         print(TEXTS['status']['frame_generated'].format(frame=f'{i:03d}', time=current_time.strftime('%H:%M')), end='\r')
 
+    sys.stdout.write('\r' + ' ' * 80 + '\r')
+    sys.stdout.flush()
     print(TEXTS['status']['sequence_completed'])
+    sleep(1)
+    clear()
 
 
 def render_ascii(img_path: str) -> None:
@@ -239,13 +204,6 @@ def render_ascii(img_path: str) -> None:
 
     except Exception as e:
             print(TEXTS['errors']['ascii'])
-
-
-def get_filename(date: datetime, city: str) -> str:
-    safe_date = date.strftime('%Y%m%d')
-    safe_city = city.strip().lower().replace(' ', '_')
-
-    return f'nightwindow_{safe_date}_{safe_city}.gif'
 
 
 @with_spinner(msg_key='creating_gif')
@@ -275,18 +233,5 @@ def create_gif(folder: str = 'frames',
     return output_name
 
 
-def end() -> None:
-    print(TEXTS['ui']['end_prompt'])
-
-    while True:
-        key = readkey().lower()
-        if key == '\n':
-            break
-        elif key == 'q':
-            app_exit()
-
-
 if __name__ == '__main__':
-    TEXTS: dict = load_texts('en')
-    LOGO: str = welcome()
     main()
