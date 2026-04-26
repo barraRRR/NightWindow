@@ -51,7 +51,11 @@ class SkySimulator:
         with load.open(hipparcos.URL) as f:
             df = hipparcos.load_dataframe(f)
 
-        self.stars_df = df[df['magnitude'] <= self.mag_limit]
+        self.stars_df = df[
+        (df['magnitude'] <= self.mag_limit) & 
+        (df['parallax_mas'] > 0)
+        ].dropna(subset=['ra_degrees', 'dec_degrees'])
+
         self.stars = Star.from_dataframe(self.stars_df)
     
     def generate_sky_frame(
